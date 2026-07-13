@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Face Expression Fun Post Generator</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h2 { color: #333; }
+        .container {
+            position: relative;
+            width: 400px;
+            height: 300px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            background: #000;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* ইমোজি ওভারলে */
+        #emoji-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 60px;
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
+        /* ফানি পোস্ট সেকশন */
+        .post-box {
+            margin-top: 20px;
+            width: 400px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .status {
+            font-weight: bold;
+            color: #ff4757;
+            margin-bottom: 10px;
+        }
+        .generated-post {
+            font-size: 18px;
+            color: #2f3542;
+            padding: 10px;
+            border: 2px dashed #70a1ff;
+            background: #f1f2f6;
+            border-radius: 6px;
+        }
+        #loading {
+            color: blue;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>AI ফেস ডিটেকশন ও ফানি পোস্ট জেনারেটর 🎭</h2>
+    <div id="loading">AI মডেল লোড হচ্ছে, দয়া করে একটু অপেক্ষা করুন...</div>
+    
+    <div class="container">
+        <video id="video" autoplay muted playsinline></video>
+        <div id="emoji-overlay">😐</div>
+    </div>
+
+    <div class="post-box">
+        <div class="status">আপনার বর্তমান মুড: <span id="mood-text">সাধারণ</span></div>
+        <div class="generated-post" id="post-text">ক্যামেরার দিকে তাকিয়ে একটা হাসি দিন! দেখি কি পোস্ট তৈরি হয়! 😄</div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const emojiOverlay = document.getElementById('emoji-overlay');
+        const moodText = document.getElementById('mood-text');
+        const postText = document.getElementById('post-text');
+        const loading = document.getElementById('loading');
+
+        // ১. AI মডেলগুলো অনলাইন CDN থেকে লোড করা হচ্ছে
+        async function loadModels() {
+            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+            loading.style.display = 'none';
+            startVideo();
+        }
+
+        // ২. ইউজারের ক্যামেরা অন করা
+        function startVideo() {
+            navigator.mediaDevices.getUserMedia({ video: {} })
+                .then(stream => { video.srcObject = stream; })
+                .catch(err => console.error("ক্যামেরা অন করা যায়নি: ", err));
+        }
+
+        // ৩. ফেস এক্সপ্রেশন ডিটেক্ট করা এবং ফানি পোস্ট আপডেট করা
+        video.addEventListener('play', () => {
+            setInterval(async () => {
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
+                
+                if (detections && detections.length > 0) {
+                    // সবচেয়ে স্পষ্ট এক্সপ্রেশনটি বের করা
+                    const expressions = detections[0].expressions;
+                    const maxExpression = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+                    
+                    updateUI(maxExpression);
+                }
+            }, 500); // প্রতি আধা সেকেন্ডে ফেস চেক করবে
+        });
+
+        // ৪. এক্সপ্রেশন অনুযায়ী ইমোজি ও ফানি পোস্টের লজিক
+        function updateUI(expression) {
+            let emoji = "😐";
+            let mood = "সাধারণ";
+            let post = "জীবনটা পুরাই প্যারালাল ইউনিভার্স হয়ে গেছে, কোনো ফিলিং নাই!";
+
+            switch(expression) {
+                case 'happy':
+                    emoji = "😂";
+                    mood = "খুশি / হাসিমুখ";
+                    post = "আজকে মনটা এতো ভালো যে ইচ্ছা করতেছে সবাইকে বিকাশ করে দেই! (কিন্তু ব্যালেন্সে তো টাকা নাই 🥲)";
+                    break;
+                case 'sad':
+                    emoji = "😭";
+                    mood = "দুঃখিত";
+                    post = "ক্রাশের রিপ্লাই না পেয়ে সিঙ্গেল লাইফের দুঃখ আর সহ্য হচ্ছে না ভাই! 💔";
+                    break;
+                case 'angry':
+                    emoji = "🤬";
+                    mood = "রাগান্বিত";
+                    post = "সামনে যে আসবে তার খবর আছে! এখন কেউ যদি বলে 'চা খাবি?' তাকেও মারবো!";
+                    break;
+                case 'surprised':
+                    emoji = "😲";
+                    mood = "অবাক";
+                    post = "পরীক্ষায় পাস করে গেছি নাকি! নাকি স্বপ্নে দেখলাম? অবিশ্বাস্য!";
+                    break;
+            }
+
+            emojiOverlay.innerText = emoji;
+            moodText.innerText = mood;
+            postText.innerText = post;
+        }
+
+        // রান করা শুরু করুন
+        loadModels();
+    </script>
+</body>
+</html>
