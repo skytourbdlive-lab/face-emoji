@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Face Expression Fun Post Generator</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -90,20 +90,29 @@
         const postText = document.getElementById('post-text');
         const loading = document.getElementById('loading');
 
-        // ১. AI মডেলগুলো অনলাইন CDN থেকে লোড করা হচ্ছে
+        // ১. AI মডেলগুলো অনলাইন থেকে লোড করা হচ্ছে (স্ট্যাবল লিংক)
         async function loadModels() {
-            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
-            loading.style.display = 'none';
-            startVideo();
+            const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+            try {
+                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+                loading.style.display = 'none';
+                startVideo();
+            } catch (error) {
+                loading.innerText = "মডেল লোড হতে সমস্যা হচ্ছে। ইন্টারনেট স্পিড চেক করুন।";
+                console.error(error);
+            }
         }
 
         // ২. ইউজারের ক্যামেরা অন করা
         function startVideo() {
             navigator.mediaDevices.getUserMedia({ video: {} })
                 .then(stream => { video.srcObject = stream; })
-                .catch(err => console.error("ক্যামেরা অন করা যায়নি: ", err));
+                .catch(err => {
+                    loading.style.display = 'block';
+                    loading.innerText = "ক্যামেরা পারমিশন দেওয়া হয়নি বা ব্রাউজার সাপোর্ট করছে না!";
+                    console.error("ক্যামেরা অন করা যায়নি: ", err);
+                });
         }
 
         // ৩. ফেস এক্সপ্রেশন ডিটেক্ট করা এবং ফানি পোস্ট আপডেট করা
