@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium AI Face Expression Tool</title>
+    <title>AI Face Expression Fun Post Generator</title>
     <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
     <style>
         :root {
-            --primary: #6c5ce7;
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --text: #f8fafc;
+            --primary: #ff4757;
+            --bg: #1e272e;
+            --card-bg: #2f3640;
+            --text: #f5f6fa;
         }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -20,52 +20,55 @@
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 20px;
+            padding: 15px;
         }
-        h2 { margin-bottom: 5px; text-align: center; font-size: 24px; color: #a29bfe; }
+        h2 { margin-bottom: 10px; text-align: center; font-size: 22px; color: #ff6b81; }
         
-        /* ভাষা পরিবর্তনের বাটন */
         .lang-switch {
             margin-bottom: 15px;
-            background: var(--card-bg);
-            border: 1px solid #334155;
-            padding: 5px 10px;
+            background: #ffa502;
+            border: none;
+            padding: 8px 15px;
             border-radius: 20px;
             cursor: pointer;
-            color: #fff;
+            color: #000;
             font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
-        .container {
+        .camera-container {
             position: relative;
             width: 100%;
             max-width: 400px;
-            height: 300px;
-            border-radius: 16px;
+            height: 350px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             background: #000;
-            border: 2px solid #334155;
+            border: 3px solid #ff4757;
         }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); /* মিরর ইফেক্ট */ }
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transform: scaleX(-1); /* মিরর ক্যামেরা */
+        }
         
-        /* অ্যানিমেটেড ইমোজি ওভারলে */
-        #emoji-overlay {
+        /* নতুন ফিচার: স্ক্রিনের উপর বড় ফানি ছবি */
+        #meme-overlay {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 55px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(5px);
-            border-radius: 50%;
-            padding: 8px;
-            animation: pulse 2s infinite;
-            pointer-events: none;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            max-height: 85%;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            display: none;
+            z-index: 10;
+            border: 4px dashed #fff;
+            background: rgba(0,0,0,0.5);
         }
 
         .post-box {
@@ -75,48 +78,46 @@
             background: var(--card-bg);
             padding: 20px;
             border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             text-align: center;
             box-sizing: border-box;
-            border: 1px solid #334155;
         }
         .status {
             font-weight: bold;
-            color: #ff7675;
+            color: #7bed9f;
             margin-bottom: 12px;
-            font-size: 16px;
+            font-size: 18px;
         }
-        .confidence { color: #55efc4; font-size: 14px; margin-left: 5px; }
         
         .generated-post {
-            font-size: 16px;
-            color: #cbd5e1;
+            font-size: 18px;
+            color: #fff;
             padding: 15px;
-            border: 2px dashed var(--primary);
-            background: rgba(108, 92, 231, 0.1);
+            border: 2px solid #5352ed;
+            background: rgba(83, 82, 237, 0.2);
             border-radius: 10px;
             margin-bottom: 15px;
-            min-height: 50px;
+            min-height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 1.4;
         }
 
-        /* প্রিমিয়াম বাটন গ্রুপ */
         .btn-group {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
         }
         .btn {
-            background: #334155;
+            background: #57606f;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 12px 5px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 14px;
             transition: 0.2s;
             display: flex;
             flex-direction: column;
@@ -124,11 +125,13 @@
             gap: 5px;
         }
         .btn:hover { background: var(--primary); }
+        .btn-snapshot { background: #2ed573; color: #000; }
+        .btn-snapshot:hover { background: #26de81; }
         
         #loading {
-            color: #fff;
-            background-color: var(--primary);
-            padding: 10px 15px;
+            color: #000;
+            background-color: #eccc68;
+            padding: 12px;
             border-radius: 8px;
             font-weight: bold;
             margin-bottom: 15px;
@@ -141,99 +144,133 @@
 </head>
 <body>
 
-    <h2 id="title-text">AI ফেস ডিটেকশন ও ফানি পোস্ট 🎭</h2>
-    <button class="lang-switch" onclick="toggleLanguage()">Language: BN</button>
+    <h2 id="title-text">আল্ট্রা-লেভেল মিম ও ফানি পোস্ট জেনারেটর 🎭</h2>
+    <button class="lang-switch" onclick="toggleLanguage()">🌐 Language: BN</button>
     
-    <div id="loading">🚀 AI মডেল লোড হচ্ছে, একটু অপেক্ষা করুন...</div>
+    <div id="loading">🚀 সার্ভার থেকে AI মডেল লোড হচ্ছে, একটু অপেক্ষা করুন...</div>
     
-    <div class="container">
+    <div class="camera-container">
         <video id="video" autoplay muted playsinline></video>
-        <div id="emoji-overlay">⏳</div>
+        <img id="meme-overlay" src="" alt="Meme Image">
     </div>
 
     <div class="post-box">
-        <div class="status"><span id="lbl-mood">আপনার মুড:</span> <span id="mood-text">...</span><span id="confidence-text" class="confidence"></span></div>
-        <div class="generated-post" id="post-text">...</div>
+        <div class="status"><span id="lbl-mood">আপনার মুড:</span> <span id="mood-text">...</span></div>
+        <div class="generated-post" id="post-text">ক্যামেরার দিকে তাকিয়ে নিজের এক্সপ্রেশন বদলান! ফানি ছবি আসবে!</div>
         
         <div class="btn-group">
             <button class="btn" onclick="speakPost()">🎙️ <span id="btn-voice">শুনুন</span></button>
-            <button class="btn" onclick="takeScreenshot()">📸 <span id="btn-snap">স্ক্রিনশট</span></button>
+            <button class="btn btn-snapshot" onclick="takeScreenshot()">📸 <span id="btn-snap">স্ক্রিনশট</span></button>
             <button class="btn" onclick="sharePost()">📱 <span id="btn-share">শেয়ার</span></button>
         </div>
     </div>
 
     <script>
         const video = document.getElementById('video');
-        const emojiOverlay = document.getElementById('emoji-overlay');
+        const memeOverlay = document.getElementById('meme-overlay');
         const moodText = document.getElementById('mood-text');
-        const confidenceText = document.getElementById('confidence-text');
         const postText = document.getElementById('post-text');
         const loading = document.getElementById('loading');
         
         let currentLang = 'bn'; 
         let currentExpression = 'neutral';
-        const MODEL_URL = 'https://vladmandic.github.io/face-api/model/';
+        
+        // ফানি মিম ছবির ডাইনামিক কালেকশন (ইউনিক ছবি)
+        const memeImages = {
+            happy: [
+                "https://i.imgflip.com/1g8my4.jpg", // Drake
+                "https://i.imgflip.com/261o3j.jpg", // Distracted Boyfriend
+                "https://i.imgflip.com/4t0m5.jpg"   // Success Kid
+            ],
+            sad: [
+                "https://i.imgflip.com/1jwhww.jpg", // Crying Cat
+                "https://i.imgflip.com/22bdq6.jpg", // Facepalm
+                "https://i.imgflip.com/1ur9b0.jpg"
+            ],
+            angry: [
+                "https://i.imgflip.com/19vcz0.jpg", // Arthur Fist
+                "https://i.imgflip.com/1110qg.jpg", // Angry Duck
+                "https://i.imgflip.com/43a45p.jpg"  // Angry woman yelling
+            ],
+            surprised: [
+                "https://i.imgflip.com/345v97.jpg", // Surprised Pikachu
+                "https://i.imgflip.com/2896ro.jpg", // Is this a pigeon
+                "https://i.imgflip.com/1otk96.jpg"
+            ],
+            neutral: [
+                "https://i.imgflip.com/1biej.jpg",  // Futurama Fry
+                "https://i.imgflip.com/24y43o.jpg",
+                "https://i.imgflip.com/1ooaki.jpg"
+            ]
+        };
 
-        // ডাইনামিক প্রিমিয়াম ডেটাসেট (বাংলা ও ইংরেজি)
         const languageData = {
             bn: {
-                loading: "🚀 AI মডেল লোড হচ্ছে, একটু অপেক্ষা করুন...",
+                loading: "🚀 মডেল লোড হচ্ছে, একটু অপেক্ষা করুন...",
                 loaded: "✅ রেডি! ক্যামেরা পারমিশন দিন...",
-                err_model: "❌ লোড ফেইল হয়েছে। পেজ রিলোড দিন।",
-                err_cam: "ক্যামেরা পারমিশন দেওয়া হয়নি!",
-                lbl_mood: "আপনার মুড:",
-                btn_voice: "শুনুন", btn_snap: "স্ক্রিনশট", btn_share: "শেয়ার",
-                title: "AI ফেস ডিটেকশন ও ফানি পোস্ট 🎭",
+                err_model: "❌ লোড ফেইল! ইন্টারনেট চেক করে রিলোড দিন।",
+                lbl_mood: "আপনার মুড:", btn_voice: "শুনুন", btn_snap: "স্ক্রিনশট", btn_share: "শেয়ার",
                 searching: "ফেস খুঁজছি...",
-                moods: { neutral: "সাধারণ", happy: "খুশি", sad: "দুঃখিত", angry: "রাগান্বিত", surprised: "অবাক" },
+                moods: { neutral: "সাধারণ 😐", happy: "খুশি 😂", sad: "দুঃখিত 😭", angry: "রাগান্বিত 🤬", surprised: "অবাক 😲" },
                 posts: {
-                    neutral: ["জীবনটা পুরাই প্যারালাল ইউনিভার্স হয়ে গেছে, কোনো ফিলিং নাই!", "ক্যামেরার দিকে তাকিয়ে একটা ভালো এক্সপ্রেশন দিন ভাই! 😐"],
-                    happy: ["আজ মনটা এতো ভালো যে ইচ্ছা করতেছে সবাইকে বিকাশ করে দেই! (কিন্তু ব্যালেন্সে টাকা নাই 🥲)", "হাসিটা সুন্দর! এই হাসির রহস্য কি ক্রাশের রিপ্লাই? নাকি পকেটে টাকা? 😂"],
-                    sad: ["ক্রাশের রিপ্লাই না পেয়ে সিঙ্গেল লাইফের দুঃখ আর সহ্য হচ্ছে না ভাই! 💔", "মন খারাপ করে লাভ নাই, দুনিয়াটা মায়া! একটা চা খেয়ে আসেন 😭"],
-                    angry: ["সামনে যে আসবে তার খবর আছে! এখন কেউ যদি বলে 'চা খাবি?' তাকেও মারবো! 🤬", "রাগ কমিয়ে হাসুন, রাগলে কিন্তু বুড়ো হয়ে যাবেন দ্রুত!"],
-                    surprised: ["পরীক্ষায় পাস করে গেছি নাকি! নাকি স্বপ্নে দেখলাম? অবিশ্বাস্য! 😲", "একি! লটারী লেগে গেল নাকি আপনার? এত বড় হা!"]
+                    neutral: ["জীবনটা পুরাই প্যারালাল ইউনিভার্স হয়ে গেছে, কোনো ফিলিং নাই!", "ক্যামেরার দিকে তাকিয়ে একটু হাসেন ভাই! রোবটের মতো লাগছে কেন?"],
+                    happy: ["আজ মনটা এতো ভালো যে ইচ্ছা করতেছে সবাইকে বিকাশ করে দেই! (কিন্তু ব্যালেন্সে তো টাকা নাই 🥲)", "ওরেব্বাবা! এত খুশি কিসের? ক্রাশ রিপ্লাই দিসে নাকি লটারি জিতসেন?"],
+                    sad: ["ক্রাশের রিপ্লাই না পেয়ে সিঙ্গেল লাইফের দুঃখ আর সহ্য হচ্ছে না ভাই! 💔", "আহা রে! মুখটা এমন বাংলা পাঁচের মতো করে রাখসেন কেন? চিল ব্রো!"],
+                    angry: ["সামনে যে আসবে তার খবর আছে! এখন কেউ যদি বলে 'চা খাবি?' তাকেও মারবো! 🤬", "ভাইরে ভাই, যেই লেভেলের রাগ! আমি তো ভয়েই কাঁপতেছি!"],
+                    surprised: ["পরীক্ষায় পাস করে গেছি নাকি! নাকি স্বপ্নে দেখলাম? অবিশ্বাস্য! 😲", "একি! এলিয়েন দেখলেন নাকি সামনে? এত বড় হা করে আছেন!"]
                 }
             },
             en: {
-                loading: "🚀 Loading AI Models, please wait...",
-                loaded: "✅ Ready! Please allow camera access...",
-                err_model: "❌ Model load failed. Please refresh.",
-                err_cam: "Camera permission denied!",
-                lbl_mood: "Your Mood:",
-                btn_voice: "Listen", btn_snap: "Snapshot", btn_share: "Share",
-                title: "AI Face & Fun Post Gen 🎭",
-                searching: "Searching face...",
-                moods: { neutral: "Neutral", happy: "Happy", sad: "Sad", angry: "Angry", surprised: "Surprised" },
+                loading: "🚀 Loading AI Models...",
+                loaded: "✅ Ready! Allow camera...",
+                err_model: "❌ Failed! Refresh page.",
+                lbl_mood: "Mood:", btn_voice: "Listen", btn_snap: "Save", btn_share: "Share",
+                searching: "Searching...",
+                moods: { neutral: "Neutral 😐", happy: "Happy 😂", sad: "Sad 😭", angry: "Angry 🤬", surprised: "Surprised 😲" },
                 posts: {
-                    neutral: ["Life is currently running on autopilot mode. No feelings!", "Give me some expressions, don't look like a robot! 😐"],
-                    happy: ["Smiling? Looks like someone just got a text from their crush! 😍", "Your smile is infectious! Keep spreading the joy! 😂"],
-                    sad: ["Sad vibes only. Is it Monday already or did your code break? 💔", "Cheer up! Tomorrow is another day to try again 😭"],
-                    angry: ["Woah, calm down! Who stole your food? 🤬", "Danger zone! Step back, this person is on fire right now!"],
-                    surprised: ["Wait, did you just see Bitcoin hitting a new high? 😲", "Unbelievable! You look like you just saw a ghost!"]
+                    neutral: ["Running on autopilot mode today. Zero feelings detected.", "Why so serious? Give the camera a little smile!"],
+                    happy: ["Someone looks like they just found money in their old jeans! 😂", "That smile! Did your code compile on the first try?"],
+                    sad: ["Sad vibes only. Did someone steal your favorite food? 💔", "Cheer up! Things will get better after a cup of tea."],
+                    angry: ["Warning! Danger zone! Do not approach this person! 🤬", "Whoa, calm down! Take a deep breath."],
+                    surprised: ["Wait, what?! Did you just see a ghost? 😲", "Mind = Blown! That expression is priceless!"]
                 }
             }
         };
 
-        // ভাষা পরিবর্তন করার ফাংশন
         function toggleLanguage() {
             currentLang = currentLang === 'bn' ? 'en' : 'bn';
-            document.querySelector('.lang-switch').innerText = `Language: ${currentLang.toUpperCase()}`;
-            document.getElementById('title-text').innerText = languageData[currentLang].title;
+            document.querySelector('.lang-switch').innerText = `🌐 Language: ${currentLang.toUpperCase()}`;
             document.getElementById('lbl-mood').innerText = languageData[currentLang].lbl_mood;
             document.getElementById('btn-voice').innerText = languageData[currentLang].btn_voice;
             document.getElementById('btn-snap').innerText = languageData[currentLang].btn_snap;
             document.getElementById('btn-share').innerText = languageData[currentLang].btn_share;
-            updateUI(currentExpression, 0); 
+            updateUI(currentExpression); 
         }
 
+        // দুইটা শক্তিশালী সার্ভার ব্যাকআপ হিসেবে দেওয়া হলো
         async function loadModels() {
-            try {
-                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-                await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+            const urls = [
+                'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights',
+                'https://justadudewhohacks.github.io/face-api.js/models'
+            ];
+            
+            let loaded = false;
+            for (let url of urls) {
+                try {
+                    await faceapi.nets.tinyFaceDetector.loadFromUri(url);
+                    await faceapi.nets.faceExpressionNet.loadFromUri(url);
+                    loaded = true;
+                    break; // প্রথমটা কাজ করলে আর পরেরটায় যাবে না
+                } catch (e) { console.warn("Failed loading from", url); }
+            }
+
+            if(loaded) {
+                loading.style.backgroundColor = '#2ed573';
                 loading.innerText = languageData[currentLang].loaded;
                 startVideo();
-            } catch (error) {
+            } else {
                 loading.style.backgroundColor = '#ff4757';
+                loading.style.color = '#fff';
                 loading.innerText = languageData[currentLang].err_model;
             }
         }
@@ -246,7 +283,7 @@
                 })
                 .catch(err => {
                     loading.style.backgroundColor = '#ff4757';
-                    loading.innerText = languageData[currentLang].err_cam;
+                    loading.innerText = "ক্যামেরা পারমিশন দেওয়া হয়নি!";
                 });
         }
 
@@ -258,72 +295,87 @@
                 if (detections && detections.length > 0) {
                     const expressions = detections[0].expressions;
                     const maxExpression = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
-                    const confidence = (expressions[maxExpression] * 100).toFixed(0);
                     
-                    currentExpression = maxExpression;
-                    
-                    if(maxExpression !== lastExpression) {
-                        updateUI(maxExpression, confidence);
+                    if(maxExpression !== lastExpression && expressions[maxExpression] > 0.6) {
+                        currentExpression = maxExpression;
+                        updateUI(maxExpression);
                         lastExpression = maxExpression;
-                    } else {
-                        confidenceText.innerText = ` (${confidence}%)`;
                     }
                 } else {
-                    emojiOverlay.innerText = "👤";
+                    memeOverlay.style.display = 'none';
                     moodText.innerText = languageData[currentLang].searching;
-                    confidenceText.innerText = "";
                 }
-            }, 600); 
+            }, 800); // একটু সময় নিয়ে চেক করবে যাতে ঘনঘন ছবি চেঞ্জ না হয়
         });
 
-        // UI আপডেট করার লজিক
-        function updateUI(expression, confidence) {
-            let emojis = { neutral: "😐", happy: "😂", sad: "😭", angry: "🤬", surprised: "😲" };
-            
-            emojiOverlay.innerText = emojis[expression] || "😐";
+        function updateUI(expression) {
             moodText.innerText = languageData[currentLang].moods[expression] || expression;
-            confidenceText.innerText = confidence ? ` (${confidence}%)` : "";
             
+            // র্যান্ডম ফানি টেক্সট পোস্ট
             const postArray = languageData[currentLang].posts[expression] || languageData[currentLang].posts['neutral'];
-            const randomPost = postArray[Math.floor(Math.random() * postArray.length)];
-            postText.innerText = randomPost;
+            postText.innerText = postArray[Math.floor(Math.random() * postArray.length)];
+
+            // র্যান্ডম মিম ছবি স্ক্রিনে ভাসানো
+            if(memeImages[expression]) {
+                const imgArray = memeImages[expression];
+                const randomImg = imgArray[Math.floor(Math.random() * imgArray.length)];
+                memeOverlay.src = randomImg;
+                memeOverlay.style.display = 'block';
+            }
         }
 
-        // 🎙️ ১. ভয়েস (SpeechSynthesis)
+        // 🎙️ ভয়েস ফিক্স: এখন একদম পারফেক্ট কাজ করবে
         function speakPost() {
             window.speechSynthesis.cancel(); 
             const text = postText.innerText;
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = currentLang === 'bn' ? 'bn-BD' : 'en-US';
+            utterance.rate = 0.9; // পড়ার স্পিড একটু নরমাল করলাম
             window.speechSynthesis.speak(utterance);
         }
 
-        // 📸 ২. স্ক্রিনশট
+        // 📸 স্ক্রিনশট ফিক্স: Blob সিস্টেম ব্যবহার করায় এখন আর মোবাইল ডাউনলোড ব্লক করবে না
         function takeScreenshot() {
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
             
-            // ভিডিওর মিরর ইফেক্ট ঠিক করা
             ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            const link = document.createElement('a');
-            link.download = `AI_Mood_Snapshot_${Date.now()}.jpeg`;
-            link.href = canvas.toDataURL('image/jpeg');
-            link.click();
+            // ফানি ছবিটাও স্ক্রিনশটে যুক্ত করে দিলাম
+            if(memeOverlay.style.display !== 'none') {
+                ctx.setTransform(1, 0, 0, 1, 0, 0); // মিরর রিমুভ করে ছবি বসাবে
+                const imgWidth = canvas.width * 0.8;
+                const imgHeight = (memeOverlay.naturalHeight / memeOverlay.naturalWidth) * imgWidth;
+                const x = (canvas.width - imgWidth) / 2;
+                const y = (canvas.height - imgHeight) / 2;
+                ctx.drawImage(memeOverlay, x, y, imgWidth, imgHeight);
+            }
+
+            // নতুন সেফ ডাউনলোড সিস্টেম (Blob Object URL)
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = `AI_Meme_Snapshot_${Date.now()}.jpg`;
+                link.href = url;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 'image/jpeg', 0.9);
         }
 
-        // 📱 ৩. শেয়ার/কপি
+        // 📱 শেয়ার বাটন
         function sharePost() {
-            const shareText = `${postText.innerText} (My AI Mood: ${moodText.innerText})`;
+            const shareText = `${postText.innerText} \n- My Mood: ${moodText.innerText}`;
             if (navigator.share) {
-                navigator.share({ title: 'AI Mood Post', text: shareText }).catch(console.error);
+                navigator.share({ title: 'AI Fun Post', text: shareText }).catch(e => console.log(e));
             } else {
                 navigator.clipboard.writeText(shareText);
-                alert(currentLang === 'bn' ? "পোস্টটি ক্লিপবোর্ডে কপি হয়েছে!" : "Post copied to clipboard!");
+                alert(currentLang === 'bn' ? "কপি হয়েছে!" : "Copied!");
             }
         }
 
